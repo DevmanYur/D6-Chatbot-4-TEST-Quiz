@@ -1,5 +1,5 @@
 
-with open('quiz-questions/1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
+with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
   file_contents = my_file.read()
 # print(file_contents)
 
@@ -9,7 +9,7 @@ rawdata = letters.encode("KOI8-R")
 
 
 def f1():
-   with open('quiz-questions/1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
+   with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
      for line in my_file:
        print(line+'1')
       # my_str = line
