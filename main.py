@@ -14,12 +14,21 @@ def f1():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
        file_contents = my_file.read()
        file_contents_split = file_contents.split('\n\n\n')
-       for questions_and_answers in  file_contents_split:
+       for questions_and_answers in  file_contents_split[1:2]:
            question_and_answer = questions_and_answers.split('\n\n')
            question_fields, answer_fields, source_fields, author_fields = question_and_answer
 
            question_field, question =  question_fields.split('\n')
            print(question)
+
+           answer_field, answer = answer_fields.split('\n')
+           print(answer)
+
+           source_field, source = source_fields.split('\n')
+           print(source)
+
+           author_field, author = author_fields.split('\n')
+           print(author)
 
 
 
