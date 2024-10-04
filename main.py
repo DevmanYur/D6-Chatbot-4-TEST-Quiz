@@ -35,7 +35,7 @@ def f1():
            questions_dict.append(question_dict)
 
        for f in questions_dict:
-           print(f)
+           print(f['Вопрос'])
 
 
 
