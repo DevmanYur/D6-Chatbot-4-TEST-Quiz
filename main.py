@@ -10,10 +10,18 @@ rawdata = letters.encode("KOI8-R")
 
 def f1():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
-     for line in my_file:
-         if line == '\n':
-             print("перенос2")
-         print(line)
+       file_contents = my_file.read()
+       sp = file_contents.split('\n\n\n')
+       print(sp)
+
+       for x in sp[:1]:
+           print(x)
+
+
+     # for line in my_file:
+     #     if line == '\n\n':
+     #         print("перенос2")
+     #     print(line)
 
          # for lett in line:
          #     if lett == '\n':
