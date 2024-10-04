@@ -1,4 +1,6 @@
 
+from pathvalidate import sanitize_filename
+
 with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
   file_contents = my_file.read()
 # print(file_contents)
@@ -11,19 +13,38 @@ rawdata = letters.encode("KOI8-R")
 def f1():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
        file_contents = my_file.read()
-       sp = file_contents.split('\n\n\n')
-       # print(sp)
+       file_contents_split = file_contents.split('\n\n\n')
+       for questions_and_answers in  file_contents_split:
+           question_and_answer = questions_and_answers.split('\n\n')
 
-       for x in sp[0:1]:
-           # print(x)
-           sp2 = x.split('\n\n')
-           print(sp2)
 
-           for y in sp2[0:1]:
-               # print(y)
-               sp3 = y.split('\n')
-               print(sp3)
-               print(sp3[1:2])
+           question, answer, source, author = question_and_answer
+           print(question)
+
+
+       #     for yyy  in sp2:
+       #         # sp3 = y.split('\n'),
+       #         print(yyy)
+       #         print()
+       # #
+       #         print()
+
+
+
+
+
+
+
+
+           # for y in sp2:
+           #     # dict1 = dict()
+           #     # dict1['Вопрос'] = ['Name']
+           #     sp3 = y.split('\n')
+           #     print(sp3)
+           #     print()
+           #
+           #     # print(sp3[0:1])
+           #     # print(sp3[1:2])
 
 
 
