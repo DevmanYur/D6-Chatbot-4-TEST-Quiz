@@ -12,10 +12,19 @@ def f1():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
        file_contents = my_file.read()
        sp = file_contents.split('\n\n\n')
-       print(sp)
+       # print(sp)
 
-       for x in sp[:1]:
-           print(x)
+       for x in sp[0:1]:
+           # print(x)
+           sp2 = x.split('\n\n')
+           print(sp2)
+
+           for y in sp2[0:1]:
+               # print(y)
+               sp3 = y.split('\n')
+               print(sp3)
+               print(sp3[1:2])
+
 
 
      # for line in my_file:
