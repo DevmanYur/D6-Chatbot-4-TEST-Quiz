@@ -16,10 +16,11 @@ def f1():
        file_contents_split = file_contents.split('\n\n\n')
        for questions_and_answers in  file_contents_split:
            question_and_answer = questions_and_answers.split('\n\n')
+           question_fields, answer_fields, source_fields, author_fields = question_and_answer
 
-
-           question, answer, source, author = question_and_answer
+           question_field, question =  question_fields.split('\n')
            print(question)
+
 
 
        #     for yyy  in sp2:
