@@ -11,7 +11,20 @@ rawdata = letters.encode("KOI8-R")
 def f1():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
      for line in my_file:
-       print(line+'1')
+         if line == '\n':
+             print("перенос2")
+         print(line)
+
+         # for lett in line:
+         #     if lett == '\n':
+         #         print("перенос2")
+         #
+         #
+         #
+         #     rawdata = lett.encode("KOI8-R")
+         #     print(rawdata)
+         #     if rawdata == b'\n':
+         #         print("перенос")
       # my_str = line
       # simvols = ['/', '-', '(', ')', 'х ф', '.', ',', '"', "'", '?', '!', 'х ф', 'м ф', 'д ф', 'к п', 'т п', 'т ф',
       #            'к ф', 'ф сп', 'науч поп ф', 'т спек', 'ф концерт', 'т с', 'ф к', 'к с им Горького', 'Культура ФГУП',
