@@ -1,5 +1,4 @@
 
-from pathvalidate import sanitize_filename
 
 with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
   file_contents = my_file.read()
