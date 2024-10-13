@@ -40,6 +40,18 @@ def start(update: Update, context: CallbackContext) -> None:
         reply_markup=ForceReply(selective=True),
     )
 
+    #########################
+
+    custom_keyboard = [['Новый вопрос', 'Сдаться'],
+                       ['Мой счёт']]
+    reply_markup = ReplyKeyboardMarkup(custom_keyboard)
+    update.message.reply_text(
+        text="Custom Keyboard Test",
+        reply_markup=reply_markup)
+
+
+##########################3
+
 
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
@@ -58,8 +70,16 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 
 def echo(update: Update, context: CallbackContext) -> None:
-    """Echo the user message."""
-    update.message.reply_text(update.message.text)
+    q = update.message.text
+    if q == 'Новый вопрос':
+        answer = 'Сейчас отправлю новый вопрос'
+        update.message.reply_text(answer)
+    elif q == 'Сдаться':
+        answer = 'Точно сдаться?'
+        update.message.reply_text(answer)
+    elif q == 'Мой счёт':
+        answer = 'Сделал запрос на Мой счёт'
+        update.message.reply_text(answer)
 
 
 def main() -> None:
