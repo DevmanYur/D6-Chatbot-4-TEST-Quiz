@@ -29,8 +29,8 @@ def get_notification(tg_bot, chat_id):
 
 
 def get_notification2(tg_bot, chat_id):
-    custom_keyboard = [['top-left', 'top-right'],
-                       ['bottom-left', 'bottom-right']]
+    custom_keyboard = [['Новый вопрос', 'Сдаться'],
+                       ['Мой счёт']]
     reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
     tg_bot.send_message(chat_id=chat_id,
                      text="Custom Keyboard Test",
@@ -51,7 +51,13 @@ def main():
     logger.setLevel(logging.DEBUG)
     logger.addHandler(TelegramLogsHandler(tg_bot, chat_id))
 
-    get_notification2(tg_bot, chat_id)
+    while True:
+        custom_keyboard = [['Новый вопрос', 'Сдаться'],
+                           ['Мой счёт']]
+        reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
+        # tg_bot.send_message(chat_id=chat_id,
+        #                     text="Custom Keyboard Test",
+        #                     reply_markup=reply_markup)
 
 
 
