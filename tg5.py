@@ -1,22 +1,9 @@
-#!/usr/bin/env python
-# pylint: disable=C0116,W0613
-# This program is dedicated to the public domain under the CC0 license.
 
-"""
-Simple Bot to reply to Telegram messages.
-
-First, a few handler functions are defined. Then, those functions are passed to
-the Dispatcher and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-
-Usage:
-Basic Echobot example, repeats messages.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
-"""
 
 import logging
 import os
+from functools import partial
+import random
 
 from dotenv import load_dotenv
 from telegram import Update, ForceReply, ReplyKeyboardMarkup
@@ -29,9 +16,34 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+def get_questions_dict():
+   with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
+       file_contents = my_file.read()
+       file_contents_split = file_contents.split('\n\n\n')
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
+       questions_dict = []
+
+       for questions_and_answers in  file_contents_split:
+           question_and_answer = questions_and_answers.split('\n\n')
+           question_fields, answer_fields, source_fields, author_fields = question_and_answer
+
+           question_field, question =  question_fields.split('\n')
+           answer_field, answer = answer_fields.split('\n')
+           source_field, source = source_fields.split('\n')
+           author_field, author = author_fields.split('\n')
+
+           question_dict = {'Вопрос': question,
+                            'Ответ': answer,
+                            'Источник': source,
+                            'Автор': author}
+
+
+           questions_dict.append(question_dict)
+
+       return questions_dict
+
+
+
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
@@ -69,10 +81,12 @@ def help_command(update: Update, context: CallbackContext) -> None:
 ##########################3
 
 
-def echo(update: Update, context: CallbackContext) -> None:
+def echo_tg(questions_dict , update: Update, context: CallbackContext):
     q = update.message.text
     if q == 'Новый вопрос':
-        answer = 'Сейчас отправлю новый вопрос'
+
+
+        answer = random.choice(questions_dict['Вопрос'])
         update.message.reply_text(answer)
     elif q == 'Сдаться':
         answer = 'Точно сдаться?'
@@ -82,11 +96,13 @@ def echo(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(answer)
 
 
-def main() -> None:
+def main():
+    questions_dict = get_questions_dict()
+    echo = partial( echo_tg, questions_dict)
+
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
-    """Start the bot."""
-    # Create the Updater and pass it your bot's token.
+
     updater = Updater(telegram_token)
 
     # Get the dispatcher to register handlers

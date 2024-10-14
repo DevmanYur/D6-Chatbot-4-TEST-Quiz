@@ -9,7 +9,7 @@ rawdata = letters.encode("KOI8-R")
 # print(rawdata)
 
 
-def f1():
+def get_questions_dict():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
        file_contents = my_file.read()
        file_contents_split = file_contents.split('\n\n\n')
@@ -33,8 +33,7 @@ def f1():
 
            questions_dict.append(question_dict)
 
-       for f in questions_dict:
-           print(f['Вопрос'])
+       return questions_dict
 
 
 
