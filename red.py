@@ -32,23 +32,28 @@ hats = {f"hat:{random.getrandbits(32)}": i for i in (
         "npurchased": 0,
     })
         }
+r = redis.Redis(host='localhost', port=6379)
 
-r10 = redis.Redis(db=10)
+host_info2 = "redis-16093.c62.us-east-1-4.ec2.redns.redis-cloud.com"
+redisObj = redis.Redis(host=host_info2, port=16093, password='qCmdpTD842pCU8HpPxWb6AvNY4Mv9zgz')
 
-# with r10.pipeline() as pipe:
+print(redisObj)
+# r11 = redis.Redis(db=11)
+#
+# with r11.pipeline() as pipe:
 #     for h_id, hat in hats.items():
 #         pipe.hmset(h_id, hat)
 #     print(pipe.execute())
-
-pprint(r10.hgetall("hat:56854717"))
-print()
-pprint(r10.keys())
-print()
-
-
-r10.hincrby("hat:56854717", "quantity", -1)
-pprint(r10.hgetall("hat:56854717"))
-
+#
+# pprint(r11.hgetall("hat:56854717"))
+# print()
+# pprint(r11.keys())
+# print()
+#
+#
+# r11.hincrby("hat:56854717", "quantity", -1)
+# pprint(r11.hgetall("hat:56854717"))
+#
 
 # 199
 # >>> r.hget("hat:56854717", "quantity")
