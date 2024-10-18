@@ -90,5 +90,12 @@ print('Подсчет общего количества элементов :', r
 print()
 
 
+# Проектирование с использованием выражений пути в формате JSON / Projecting using JSON Path expressions
+rez = r.ft().search(Query("Paul").
+                    return_field("$.user.city", as_field="city")).docs
+print('Проектирование с использованием выражений пути в формате JSON :', rez)
+print()
+
+
 
 
