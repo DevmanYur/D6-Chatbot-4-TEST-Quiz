@@ -62,8 +62,33 @@ pprint(r.keys())
 
 print()
 
-p = r.ft().search("Paul")
-print('Поиск :', p)
+# Простой поиск
+q = r.ft().search("Paul")
+print('Простой поиск :', q)
+print()
+
+# Фильтрация результатов поиска
+q1 = Query("Paul").add_filter(NumericFilter("age", 30, 40))
+rez = r.ft().search(q1)
+print('Фильтрация результатов поиска :', rez)
+print()
+
+# Разбивка на страницы и упорядочивание результатов поиска
+# Search for all users, returning 2 users at a time and sorting by age in descending order
+offset = 0
+num = 2
+q = Query("*").paging(offset, num).sort_by("age", asc=False) # pass asc=True to sort in ascending order
+rez = r.ft().search(q)
+print('Разбивка на страницы и упорядочивание результатов поиска :', rez)
+print()
+
+
+# Подсчет общего количества элементов / Counting the total number of Items
+q = Query("*").paging(0, 0)
+rez = r.ft().search(q).total
+print('Подсчет общего количества элементов :', rez)
+print()
+
 
 
 
