@@ -33,11 +33,15 @@ hats = {f"hat:{random.getrandbits(32)}": i for i in (
     })
         }
 r = redis.Redis(host='localhost', port=6379)
+print(r)
+pprint(r.keys())
+print()
 
 host_info2 = "redis-16093.c62.us-east-1-4.ec2.redns.redis-cloud.com"
 redisObj = redis.Redis(host=host_info2, port=16093, password='qCmdpTD842pCU8HpPxWb6AvNY4Mv9zgz')
 
 print(redisObj)
+pprint(redisObj.keys())
 # r11 = redis.Redis(db=11)
 #
 # with r11.pipeline() as pipe:
