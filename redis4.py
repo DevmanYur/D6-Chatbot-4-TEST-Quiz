@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import redis
 
 
@@ -8,3 +10,6 @@ password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
 r = redis.Redis(host=host, port=port, password=password, decode_responses=True)
 
 print(r.ping())
+
+pprint(r.keys())
+pprint(r.get('1076073346'))

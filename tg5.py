@@ -18,12 +18,12 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def get_questions_dict():
+def get_units_dict():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
        file_contents = my_file.read()
        file_contents_split = file_contents.split('\n\n\n')
 
-       questions_dict = []
+       units_dict = []
 
        for questions_and_answers in  file_contents_split:
            question_and_answer = questions_and_answers.split('\n\n')
@@ -34,15 +34,15 @@ def get_questions_dict():
            source_field, source = source_fields.split('\n')
            author_field, author = author_fields.split('\n')
 
-           question_dict = {'Вопрос': question,
+           unit_dict = {'Вопрос': question,
                             'Ответ': answer,
                             'Источник': source,
                             'Автор': author}
 
 
-           questions_dict.append(question_dict)
+           units_dict.append(unit_dict)
 
-       return questions_dict
+       return units_dict
 
 
 
@@ -83,36 +83,39 @@ def help_command(update: Update, context: CallbackContext) -> None:
 ##########################3
 
 
-def echo_tg(questions_dict , update: Update, context: CallbackContext):
+def echo_tg(units_dict , update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
-    q = update.message.text
-    dict_up = questions_dict
+    keyboard_from_user = update.message.text
 
-    host_info2 = "redis-16093.c62.us-east-1-4.ec2.redns.redis-cloud.com"
-    r = redis.Redis(host=host_info2, port=16093, password='qCmdpTD842pCU8HpPxWb6AvNY4Mv9zgz', decode_responses=True,
-                    db=0)
-
-    if q == 'Новый вопрос':
+    if keyboard_from_user == 'Новый вопрос':
 
 
-        answer = random.choice(questions_dict)
-        update.message.reply_text(answer['Вопрос'])
+        unit_from_bot = random.choice(units_dict)
+        question_from_bot = unit_from_bot['Вопрос']
 
-        r.set(chat_id, answer['Вопрос'])
 
-        print(r.exists(chat_id))
-        print(r.get(chat_id))
-        print()
-    elif q == 'Сдаться':
+        update.message.reply_text(question_from_bot)
+
+        host = "redis-19445.c52.us-east-1-4.ec2.redns.redis-cloud.com"
+        port = 19445
+        password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
+        r = redis.Redis(host=host, port=port, password=password, decode_responses=True)
+
+        r.set(chat_id, question_from_bot)
+
+
+
+
+    elif keyboard_from_user == 'Сдаться':
         answer = 'Точно сдаться?'
         update.message.reply_text(answer)
-    elif q == 'Мой счёт':
+    elif keyboard_from_user == 'Мой счёт':
         answer = 'Сделал запрос на Мой счёт'
         update.message.reply_text(answer)
 
 
 def main():
-    questions_dict = get_questions_dict()
+    units_dict = get_units_dict()
     # pprint( questions_dict)
     # dict_up = questions_dict
     # print()
@@ -125,7 +128,7 @@ def main():
     #
     # dict_up.pop(random_index)
     # pprint(dict_up)
-    echo = partial( echo_tg, questions_dict)
+    echo = partial( echo_tg, units_dict)
 
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
