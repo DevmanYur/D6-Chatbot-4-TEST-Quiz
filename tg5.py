@@ -88,19 +88,10 @@ def echo_tg(units_dict ,r,  update: Update, context: CallbackContext):
     keyboard_from_user = update.message.text
 
     if keyboard_from_user == 'Новый вопрос':
-
-
         unit_from_bot = random.choice(units_dict)
         question_from_bot = unit_from_bot['Вопрос']
-
-
         update.message.reply_text(question_from_bot)
-
-
         r.set(chat_id, question_from_bot)
-
-
-
 
     elif keyboard_from_user == 'Сдаться':
         answer = 'Точно сдаться?'
@@ -108,7 +99,6 @@ def echo_tg(units_dict ,r,  update: Update, context: CallbackContext):
     elif keyboard_from_user == 'Мой счёт':
         answer = 'Сделал запрос на Мой счёт'
         update.message.reply_text(answer)
-
 
 def main():
     units_dict = get_units_dict()
