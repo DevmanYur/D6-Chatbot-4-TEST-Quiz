@@ -83,7 +83,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
 ##########################3
 
 
-def echo_tg(units_dict , update: Update, context: CallbackContext):
+def echo_tg(units_dict ,r,  update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
     keyboard_from_user = update.message.text
 
@@ -96,10 +96,6 @@ def echo_tg(units_dict , update: Update, context: CallbackContext):
 
         update.message.reply_text(question_from_bot)
 
-        host = "redis-19445.c52.us-east-1-4.ec2.redns.redis-cloud.com"
-        port = 19445
-        password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
-        r = redis.Redis(host=host, port=port, password=password, decode_responses=True)
 
         r.set(chat_id, question_from_bot)
 
@@ -116,19 +112,12 @@ def echo_tg(units_dict , update: Update, context: CallbackContext):
 
 def main():
     units_dict = get_units_dict()
-    # pprint( questions_dict)
-    # dict_up = questions_dict
-    # print()
-    # pprint(dict_up)
-    #
-    # random_index = random.randint(0, len(questions_dict) - 1)
-    # pprint(random_index)
-    # answer = questions_dict[random_index]
-    # print(answer)
-    #
-    # dict_up.pop(random_index)
-    # pprint(dict_up)
-    echo = partial( echo_tg, units_dict)
+    host = "redis-19445.c52.us-east-1-4.ec2.redns.redis-cloud.com"
+    port = 19445
+    password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
+    r = redis.Redis(host=host, port=port, password=password, decode_responses=True)
+
+    echo = partial( echo_tg, units_dict, r)
 
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
