@@ -91,13 +91,28 @@ def get_new_q(units_dict, update: Update, context: CallbackContext):
     update.message.reply_text(unit['Вопрос'])
 
     pprint(update.message.chat_id)
-    pprint(update.message.)
+
 
 def get_sdatsa(update: Update, context: CallbackContext):
     update.message.reply_text('Точно сдаться?__')
 
 def get_my(update: Update, context: CallbackContext):
     update.message.reply_text('Сделал запрос на Мой счёт__')
+
+
+
+def get_redis_start():
+    host = "redis-19445.c52.us-east-1-4.ec2.redns.redis-cloud.com"
+    port = 19445
+    password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
+    redis_object = redis.Redis(host=host, port=port, password=password, decode_responses=True)
+    units_dict = get_units_dict()
+
+    unit_from_bot = random.choice(units_dict)
+    print(unit_from_bot)
+
+    return redis_object
+
 
 def main():
     units_dict = get_units_dict()
@@ -114,6 +129,12 @@ def main():
     # dict_up.pop(random_index)
     # pprint(dict_up)
     get_new_question = partial( get_new_q, units_dict)
+    redis_object = get_redis_start()
+    print(redis_object.ping())
+    # redis_object_0 = redis_object.keys()[0]
+    #
+    # pprint(redis_object.keys())
+    # pprint(redis_object.get(redis_object_0))
 
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
@@ -128,6 +149,7 @@ def main():
     dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
     dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
     dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
+
 
 
     # Start the Bot
