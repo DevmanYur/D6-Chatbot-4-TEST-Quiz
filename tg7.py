@@ -54,8 +54,6 @@ def start(update: Update, context: CallbackContext) -> None:
         reply_markup=ForceReply(selective=True),
     )
 
-    #########################
-
     custom_keyboard = [['Новый вопрос', 'Сдаться'],
                        ['Мой счёт']]
     reply_markup = ReplyKeyboardMarkup(custom_keyboard)
@@ -63,24 +61,6 @@ def start(update: Update, context: CallbackContext) -> None:
         text="Custom Keyboard Test",
         reply_markup=reply_markup)
 
-
-##########################3
-
-
-def help_command(update: Update, context: CallbackContext) -> None:
-    """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
-
-#########################
-
-    custom_keyboard = [['Новый вопрос', 'Сдаться'],
-                       ['Мой счёт']]
-    reply_markup = ReplyKeyboardMarkup(custom_keyboard)
-    update.message.reply_text(
-                     text="Custom Keyboard Test",
-                     reply_markup=reply_markup)
-
-##########################3
 
 
 # def echo_tg(units_dict , update: Update, context: CallbackContext):
@@ -104,11 +84,11 @@ def help_command(update: Update, context: CallbackContext) -> None:
 #         answer = 'Сделал запрос на Мой счёт'
 #         update.message.reply_text(answer)
 
-def privet(update: Update, context: CallbackContext):
-    update.message.reply_text('Привет! Рад видеть!__')
 
-def get_new_q(update: Update, context: CallbackContext):
+def get_new_q(units_dict, update: Update, context: CallbackContext):
+    unit = random.choice(units_dict)
     update.message.reply_text('Сейчас отправлю новый вопрос!__')
+    update.message.reply_text(unit['Вопрос'])
 
 def get_sdatsa(update: Update, context: CallbackContext):
     update.message.reply_text('Точно сдаться?__')
@@ -130,7 +110,7 @@ def main():
     #
     # dict_up.pop(random_index)
     # pprint(dict_up)
-    # cho = partial( echo_tg, units_dict)
+    get_new_question = partial( get_new_q, units_dict)
 
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
@@ -142,12 +122,7 @@ def main():
 
     # on different commands - answer in Telegram
     dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("help", help_command))
-
-    # on non command i.e message - echo the message on Telegram
-    # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
-    dispatcher.add_handler(MessageHandler(Filters.text('Привет'), privet))
-    dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_q))
+    dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
     dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
     dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
 
