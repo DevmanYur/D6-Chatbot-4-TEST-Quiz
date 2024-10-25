@@ -85,12 +85,15 @@ def start(update: Update, context: CallbackContext) -> None:
 #         update.message.reply_text(answer)
 
 
-def get_new_q(units_dict, update: Update, context: CallbackContext):
+def get_new_q(units_dict, redis_object, update: Update, context: CallbackContext):
     unit = random.choice(units_dict)
     update.message.reply_text('Сейчас отправлю новый вопрос!__')
     update.message.reply_text(unit['Вопрос'])
+    chat_id = update.message.chat_id
 
-    pprint(update.message.chat_id)
+    unit_dict = {'chat_id': chat_id}
+    redis_object.mset(unit_dict)
+
 
 
 def get_sdatsa(update: Update, context: CallbackContext):
@@ -106,11 +109,6 @@ def get_redis_start():
     port = 19445
     password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
     redis_object = redis.Redis(host=host, port=port, password=password, decode_responses=True)
-    units_dict = get_units_dict()
-
-    unit_from_bot = random.choice(units_dict)
-    print(unit_from_bot)
-
     return redis_object
 
 
@@ -128,37 +126,50 @@ def main():
     #
     # dict_up.pop(random_index)
     # pprint(dict_up)
-    get_new_question = partial( get_new_q, units_dict)
+
+
     redis_object = get_redis_start()
     print(redis_object.ping())
+
+    unit = random.choice(units_dict)
+    print(unit)
+    chat_id = 1
+
+    unit = {'chat_id': chat_id}
+    redis_object.mset(unit)
+
+
+
+
+    get_new_question = partial(get_new_q, units_dict, redis_object)
     # redis_object_0 = redis_object.keys()[0]
     #
     # pprint(redis_object.keys())
     # pprint(redis_object.get(redis_object_0))
 
     load_dotenv()
-    telegram_token = os.environ['TG_TOKEN']
-
-    updater = Updater(telegram_token)
-
-    # Get the dispatcher to register handlers
-    dispatcher = updater.dispatcher
+    # telegram_token = os.environ['TG_TOKEN']
+    #
+    # updater = Updater(telegram_token)
+    #
+    # # Get the dispatcher to register handlers
+    # dispatcher = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
-    dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
-    dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
+    # dispatcher.add_handler(CommandHandler("start", start))
+    # dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
+    # dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
+    # dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
 
 
 
-    # Start the Bot
-    updater.start_polling()
-
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+    # # Start the Bot
+    # updater.start_polling()
+    #
+    # # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    # # SIGTERM or SIGABRT. This should be used most of the time, since
+    # # start_polling() is non-blocking and will stop the bot gracefully.
+    # updater.idle()
 
 
 if __name__ == '__main__':
