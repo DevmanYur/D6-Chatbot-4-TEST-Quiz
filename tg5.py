@@ -88,23 +88,14 @@ def echo_tg(units_dict , update: Update, context: CallbackContext):
     keyboard_from_user = update.message.text
 
     if keyboard_from_user == 'Новый вопрос':
-
-
         unit_from_bot = random.choice(units_dict)
         question_from_bot = unit_from_bot['Вопрос']
-
-
         update.message.reply_text(question_from_bot)
-
         host = "redis-19445.c52.us-east-1-4.ec2.redns.redis-cloud.com"
         port = 19445
         password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
         r = redis.Redis(host=host, port=port, password=password, decode_responses=True)
-
         r.set(chat_id, question_from_bot)
-
-
-
 
     elif keyboard_from_user == 'Сдаться':
         answer = 'Точно сдаться?'
@@ -113,6 +104,8 @@ def echo_tg(units_dict , update: Update, context: CallbackContext):
         answer = 'Сделал запрос на Мой счёт'
         update.message.reply_text(answer)
 
+def privet(update: Update, context: CallbackContext):
+    update.message.reply_text('Привет! Рад видеть!')
 
 def main():
     units_dict = get_units_dict()
@@ -143,7 +136,9 @@ def main():
     dispatcher.add_handler(CommandHandler("help", help_command))
 
     # on non command i.e message - echo the message on Telegram
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+    # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+    dispatcher.add_handler(MessageHandler(Filters.text('Привет'), privet))
+
 
     # Start the Bot
     updater.start_polling()
