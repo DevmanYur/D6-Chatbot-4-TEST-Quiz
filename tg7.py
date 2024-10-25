@@ -90,6 +90,9 @@ def get_new_q(units_dict, update: Update, context: CallbackContext):
     update.message.reply_text('Сейчас отправлю новый вопрос!__')
     update.message.reply_text(unit['Вопрос'])
 
+    pprint(update.message.chat_id)
+    pprint(update.message.)
+
 def get_sdatsa(update: Update, context: CallbackContext):
     update.message.reply_text('Точно сдаться?__')
 
