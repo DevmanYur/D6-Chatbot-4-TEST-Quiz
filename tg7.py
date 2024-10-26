@@ -85,14 +85,24 @@ def start(update: Update, context: CallbackContext) -> None:
 #         update.message.reply_text(answer)
 
 
-def get_new_q(units_dict, redis_object, update: Update, context: CallbackContext):
+def get_new_q(units_dict, update: Update, context: CallbackContext):
     unit = random.choice(units_dict)
+    print('юнит', unit)
     update.message.reply_text('Сейчас отправлю новый вопрос!__')
     update.message.reply_text(unit['Вопрос'])
     chat_id = update.message.chat_id
 
-    unit_dict = {'chat_id': chat_id}
-    redis_object.mset(unit_dict)
+
+    redis_object = get_redis_start()
+    redis_object.mset(unit)
+    redis_object.set('chat_id', chat_id)
+    pprint(redis_object.keys())
+    pprint(redis_object.get('chat_id'))
+    pprint(redis_object.get('Вопрос'))
+    update.message.reply_text(redis_object.get('Вопрос'))
+    update.message.reply_text(redis_object.get('Ответ'))
+    update.message.reply_text(redis_object.get('chat_id'))
+
 
 
 
@@ -111,7 +121,8 @@ def get_redis_start():
     redis_object = redis.Redis(host=host, port=port, password=password, decode_responses=True)
     return redis_object
 
-
+def get_otvet(update: Update, context: CallbackContext):
+    update.message.reply_text('Это правльный ответ')
 def main():
     units_dict = get_units_dict()
     # pprint( questions_dict)
@@ -119,57 +130,59 @@ def main():
     # print()
     # pprint(dict_up)
     #
-    # random_index = random.randint(0, len(questions_dict) - 1)
-    # pprint(random_index)
-    # answer = questions_dict[random_index]
-    # print(answer)
-    #
-    # dict_up.pop(random_index)
-    # pprint(dict_up)
+    # random_index = random.randint(0, len(units_dict) - 1)
+    # print('индекс', random_index)
+    # unit = units_dict[random_index]
+    # print('юнит',unit)
+    # #
+    # # dict_up.pop(random_index)
+    # # pprint(dict_up)
 
+    # print(redis_object.ping())
+    #
+    # print()
+    # redis_object.mset(unit)
+    # print('первый шаг', redis_object.keys())
+    # print('первый шаг', redis_object.get('Вопрос'))
+    # print('первый шаг', redis_object.get('Ответ'))
+
+    # unit = random.choice(units_dict)
+    # print(unit)
+    # chat_id = 1
+    #
+    # unit = {'chat_id': chat_id}
+    # redis_object.mset(unit)
 
     redis_object = get_redis_start()
-    print(redis_object.ping())
-
-    unit = random.choice(units_dict)
-    print(unit)
-    chat_id = 1
-
-    unit = {'chat_id': chat_id}
-    redis_object.mset(unit)
+    otvet = redis_object.get('Ответ')
 
 
-
-
-    get_new_question = partial(get_new_q, units_dict, redis_object)
-    # redis_object_0 = redis_object.keys()[0]
-    #
-    # pprint(redis_object.keys())
-    # pprint(redis_object.get(redis_object_0))
+    get_new_question = partial(get_new_q, units_dict)
 
     load_dotenv()
-    # telegram_token = os.environ['TG_TOKEN']
-    #
-    # updater = Updater(telegram_token)
-    #
-    # # Get the dispatcher to register handlers
-    # dispatcher = updater.dispatcher
+    telegram_token = os.environ['TG_TOKEN']
+    updater = Updater(telegram_token)
 
-    # on different commands - answer in Telegram
-    # dispatcher.add_handler(CommandHandler("start", start))
-    # dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
-    # dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
-    # dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
+    # Get the dispatcher to register handlers
+    dispatcher = updater.dispatcher
 
 
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
 
-    # # Start the Bot
-    # updater.start_polling()
-    #
-    # # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # # SIGTERM or SIGABRT. This should be used most of the time, since
-    # # start_polling() is non-blocking and will stop the bot gracefully.
-    # updater.idle()
+    dispatcher.add_handler(MessageHandler(Filters.text(otvet), get_otvet))
+    dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
+    dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
+
+
+
+    # Start the Bot
+    updater.start_polling()
+
+    # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT. This should be used most of the time, since
+    # start_polling() is non-blocking and will stop the bot gracefully.
+    updater.idle()
 
 
 if __name__ == '__main__':

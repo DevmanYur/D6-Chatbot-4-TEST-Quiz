@@ -15,3 +15,7 @@ print(r.ping())
 
 pprint(r.keys())
 pprint(r.get('chat_id'))
+pprint(r.get('Вопрос'))
+pprint(r.get('Ответ'))
+
+
