@@ -122,7 +122,17 @@ def get_redis_start():
     return redis_object
 
 def get_otvet(update: Update, context: CallbackContext):
-    update.message.reply_text('Это правльный ответ')
+    redis_object = get_redis_start()
+    otvet = redis_object.get('Ответ')
+
+    word_from_user = update.message.text
+    if word_from_user == otvet:
+        update.message.reply_text('Это правльный ответ')
+
+    else:
+        update.message.reply_text(f'Это Не правльный ответ, верный ответ {otvet}')
+
+
 def main():
     units_dict = get_units_dict()
     # pprint( questions_dict)
@@ -169,10 +179,9 @@ def main():
 
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
-
-    dispatcher.add_handler(MessageHandler(Filters.text(otvet), get_otvet))
     dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
     dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
+    dispatcher.add_handler(MessageHandler(Filters.text, get_otvet))
 
 
 
