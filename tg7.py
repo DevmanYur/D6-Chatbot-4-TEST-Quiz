@@ -85,20 +85,15 @@ def start(update: Update, context: CallbackContext) -> None:
 #         update.message.reply_text(answer)
 
 
-def get_new_q(units_dict, update: Update, context: CallbackContext):
+def get_new_q(units_dict, redis_object,  update: Update, context: CallbackContext):
     unit = random.choice(units_dict)
     print('юнит', unit)
     update.message.reply_text('Сейчас отправлю новый вопрос!__')
     update.message.reply_text(unit['Вопрос'])
     chat_id = update.message.chat_id
 
-
-    redis_object = get_redis_start()
     redis_object.mset(unit)
     redis_object.set('chat_id', chat_id)
-    pprint(redis_object.keys())
-    pprint(redis_object.get('chat_id'))
-    pprint(redis_object.get('Вопрос'))
     update.message.reply_text(redis_object.get('Вопрос'))
     update.message.reply_text(redis_object.get('Ответ'))
     update.message.reply_text(redis_object.get('chat_id'))
@@ -121,10 +116,9 @@ def get_redis_start():
     redis_object = redis.Redis(host=host, port=port, password=password, decode_responses=True)
     return redis_object
 
-def get_otvet(update: Update, context: CallbackContext):
-    redis_object = get_redis_start()
-    otvet = redis_object.get('Ответ')
+def get_otvet(redis_object, update: Update, context: CallbackContext):
 
+    otvet = redis_object.get('Ответ')
     word_from_user = update.message.text
     if word_from_user == otvet:
         update.message.reply_text('Это правльный ответ')
@@ -164,10 +158,9 @@ def main():
     # redis_object.mset(unit)
 
     redis_object = get_redis_start()
-    otvet = redis_object.get('Ответ')
 
-
-    get_new_question = partial(get_new_q, units_dict)
+    get_new_question = partial(get_new_q,  units_dict, redis_object)
+    get_new_otvet = partial(get_otvet,   redis_object)
 
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
@@ -181,7 +174,7 @@ def main():
     dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
     dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
     dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
-    dispatcher.add_handler(MessageHandler(Filters.text, get_otvet))
+    dispatcher.add_handler(MessageHandler(Filters.text, get_new_otvet))
 
 
 
