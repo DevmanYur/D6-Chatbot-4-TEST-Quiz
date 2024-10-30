@@ -34,30 +34,23 @@ def get_units():
 def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     update.message.reply_markdown_v2(
-        fr'Hi {user.mention_markdown_v2()}\!',
+        fr'{user.mention_markdown_v2()} приветствую в нашей викторине\! Чтобы продолжить, нажми на "Новый вопрос" ☺',
         reply_markup=ForceReply(selective=True),
     )
 
     custom_keyboard = [['Новый вопрос', 'Сдаться'],
                        ['Мой счёт']]
     reply_markup = ReplyKeyboardMarkup(custom_keyboard)
-    update.message.reply_text(
-        text="Custom Keyboard Test",
-        reply_markup=reply_markup)
+    update.message.reply_text(reply_markup=reply_markup)
 
 
 def get_question(units_dict, redis_object,  update: Update, context: CallbackContext):
     unit = random.choice(units_dict)
-    print('юнит', unit)
-    update.message.reply_text('Сейчас отправлю новый вопрос!__')
+    update.message.reply_text('Сейчас отправлю новый вопрос!')
     update.message.reply_text(unit['Вопрос'])
     chat_id = update.message.chat_id
-
     redis_object.mset(unit)
     redis_object.set('chat_id', chat_id)
-    update.message.reply_text(redis_object.get('Вопрос'))
-    update.message.reply_text(redis_object.get('Ответ'))
-    update.message.reply_text(redis_object.get('chat_id'))
 
 
 def give_in(update: Update, context: CallbackContext):
