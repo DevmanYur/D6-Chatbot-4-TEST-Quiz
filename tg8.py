@@ -9,17 +9,13 @@ from telegram import Update, ForceReply, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
-
 logger = logging.getLogger(__name__)
 
-def get_units_dict():
+def get_units():
    with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
        file_contents = my_file.read()
        file_contents_split = file_contents.split('\n\n\n')
-       units_dict = []
+       units = []
        for questions_and_answers in  file_contents_split:
            question_and_answer = questions_and_answers.split('\n\n')
            question_fields, answer_fields, source_fields, author_fields = question_and_answer
@@ -31,8 +27,8 @@ def get_units_dict():
                             'Ответ': answer,
                             'Источник': source,
                             'Автор': author}
-           units_dict.append(unit_dict)
-       return units_dict
+           units.append(unit_dict)
+       return units
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -50,7 +46,7 @@ def start(update: Update, context: CallbackContext) -> None:
         reply_markup=reply_markup)
 
 
-def get_new_q(units_dict, redis_object,  update: Update, context: CallbackContext):
+def get_question(units_dict, redis_object,  update: Update, context: CallbackContext):
     unit = random.choice(units_dict)
     print('юнит', unit)
     update.message.reply_text('Сейчас отправлю новый вопрос!__')
@@ -64,65 +60,51 @@ def get_new_q(units_dict, redis_object,  update: Update, context: CallbackContex
     update.message.reply_text(redis_object.get('chat_id'))
 
 
-def get_sdatsa(update: Update, context: CallbackContext):
-    update.message.reply_text('Точно сдаться?__')
+def give_in(update: Update, context: CallbackContext):
+    update.message.reply_text('Точно сдаться?')
 
-def get_my(update: Update, context: CallbackContext):
+def get_my_account(update: Update, context: CallbackContext):
     update.message.reply_text('Сделал запрос на Мой счёт.')
 
 
-
-def get_redis_start():
-    host = "redis-19445.c52.us-east-1-4.ec2.redns.redis-cloud.com"
-    port = 19445
-    password = 'kx7oAwxlp7JMLjhpzzUyOEz1hFuqUQKe'
-    redis_object = redis.Redis(host=host, port=port, password=password, decode_responses=True)
-    return redis_object
-
-def get_otvet(redis_object, update: Update, context: CallbackContext):
-
-    otvet = redis_object.get('Ответ')
-    word_from_user = update.message.text
-    if word_from_user == otvet:
+def send_answer(redis_object, update: Update, context: CallbackContext):
+    answer = redis_object.get('Ответ')
+    if update.message.text == answer:
         update.message.reply_text('Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»')
-
     else:
-        update.message.reply_text(f'Неправильно… Верный ответ {otvet}')
+        update.message.reply_text(f'Неправильно… Верный ответ {answer}')
+
+
+def start_tg_bot(telegram_token, redis_object, units):
+    get_new_question = partial(get_question, units, redis_object)
+    send_new_answer = partial(send_answer, redis_object)
+
+    updater = Updater(telegram_token)
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
+    dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), give_in))
+    dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my_account))
+    dispatcher.add_handler(MessageHandler(Filters.text, send_new_answer))
+    updater.start_polling()
+    updater.idle()
 
 
 def main():
-    units_dict = get_units_dict()
-
-    
-    redis_object = get_redis_start()
-
-    get_new_question = partial(get_new_q,  units_dict, redis_object)
-    get_new_otvet = partial(get_otvet,   redis_object)
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    )
 
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
-    updater = Updater(telegram_token)
+    redis_host = os.environ['REDIS_HOST']
+    redis_port = os.environ['REDIS_PORT']
+    redis_password = os.environ['REDIS_PASSWORD']
+    redis_object = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
 
-    # Get the dispatcher to register handlers
-    dispatcher = updater.dispatcher
+    units = get_units()
 
-
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
-    dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_sdatsa))
-    dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my))
-    dispatcher.add_handler(MessageHandler(Filters.text, get_new_otvet))
-
-
-
-    # Start the Bot
-    updater.start_polling()
-
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
-
+    start_tg_bot(telegram_token, redis_object, units)
 
 if __name__ == '__main__':
     main()
