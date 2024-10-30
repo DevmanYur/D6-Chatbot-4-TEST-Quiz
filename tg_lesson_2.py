@@ -1,186 +1,165 @@
+#!/usr/bin/env python
+# pylint: disable=C0116,W0613
+# This program is dedicated to the public domain under the CC0 license.
+
+"""
+First, a few callback functions are defined. Then, those functions are passed to
+the Dispatcher and registered at their respective places.
+Then, the bot is started and runs until we press Ctrl-C on the command line.
+
+Usage:
+Example of a bot-user conversation using ConversationHandler.
+Send /start to initiate the conversation.
+Press Ctrl-C on the command line or send a signal to the process to stop the
+bot.
+"""
+
 import logging
 import os
+from typing import Dict
 
 from dotenv import load_dotenv
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import ReplyKeyboardMarkup, Update, ReplyKeyboardRemove
 from telegram.ext import (
     Updater,
     CommandHandler,
-    CallbackQueryHandler,
+    MessageHandler,
+    Filters,
     ConversationHandler,
+    CallbackContext,
 )
 
-# Ведение журнала логов
+# Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
 logger = logging.getLogger(__name__)
 
-# Этапы/состояния разговора
-FIRST, SECOND = range(2)
-# Данные обратного вызова
-ONE, TWO, THREE, FOUR = range(4)
+CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
+
+reply_keyboard = [
+    ['Age', 'Favourite colour'],
+    ['Number of siblings', 'Something else...'],
+    ['Done'],
+]
+markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 
 
-def start(update, _):
-    """Вызывается по команде `/start`."""
-    # Получаем пользователя, который запустил команду `/start`
-    user = update.message.from_user
-    logger.info("Пользователь %s начал разговор", user.first_name)
-    # Создаем `InlineKeyboard`, где каждая кнопка имеет
-    # отображаемый текст и строку `callback_data`
-    # Клавиатура - это список строк кнопок, где каждая строка,
-    # в свою очередь, является списком `[[...]]`
-    keyboard = [
-        [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    # Отправляем сообщение с текстом и добавленной клавиатурой `reply_markup`
+def facts_to_str(user_data: Dict[str, str]) -> str:
+    """Helper function for formatting the gathered user info."""
+    facts = [f'{key} - {value}' for key, value in user_data.items()]
+    return "\n".join(facts).join(['\n', '\n'])
+
+
+def start(update: Update, context: CallbackContext) -> int:
+    """Start the conversation and ask user for input."""
     update.message.reply_text(
-        text="Запустите обработчик, выберите маршрут", reply_markup=reply_markup
+        "Hi! My name is Doctor Botter. I will hold a more complex conversation with you. "
+        "Why don't you tell me something about yourself?",
+        reply_markup=markup,
     )
-    # Сообщаем `ConversationHandler`, что сейчас состояние `FIRST`
-    return FIRST
+
+    return CHOOSING
 
 
-def start_over(update, _):
-    """Тот же текст и клавиатура, что и при `/start`, но не как новое сообщение"""
-    # Получаем `CallbackQuery` из обновления `update`
-    query = update.callback_query
-    # На запросы обратного вызова необходимо ответить,
-    # даже если уведомление для пользователя не требуется.
-    # В противном случае у некоторых клиентов могут возникнуть проблемы.
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-   # Отредактируем сообщение, вызвавшее обратный вызов.
-   # Это создает ощущение интерактивного меню.
-    query.edit_message_text(
-        text="Выберите маршрут", reply_markup=reply_markup
+def regular_choice(update: Update, context: CallbackContext) -> int:
+    """Ask the user for info about the selected predefined choice."""
+    text = update.message.text
+    context.user_data['choice'] = text
+    update.message.reply_text(f'Your {text.lower()}? Yes, I would love to hear about that!')
+
+    return TYPING_REPLY
+
+
+def custom_choice(update: Update, context: CallbackContext) -> int:
+    """Ask the user for a description of a custom category."""
+    update.message.reply_text(
+        'Alright, please send me the category first, for example "Most impressive skill"'
     )
-    # Сообщаем `ConversationHandler`, что сейчас находимся в состоянии `FIRST`
-    return FIRST
+
+    return TYPING_CHOICE
 
 
-def one(update, _):
-    """Показ нового выбора кнопок"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Вызов `CallbackQueryHandler`, выберите маршрут", reply_markup=reply_markup
+def received_information(update: Update, context: CallbackContext) -> int:
+    """Store info provided by user and ask for the next category."""
+    user_data = context.user_data
+    text = update.message.text
+    category = user_data['choice']
+    user_data[category] = text
+    del user_data['choice']
+
+    update.message.reply_text(
+        "Neat! Just so you know, this is what you already told me:"
+        f"{facts_to_str(user_data)} You can tell me more, or change your opinion"
+        " on something.",
+        reply_markup=markup,
     )
-    return FIRST
+
+    return CHOOSING
 
 
-def two(update, _):
-    """Показ нового выбора кнопок"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("1", callback_data=str(ONE)),
-            InlineKeyboardButton("3", callback_data=str(THREE)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Второй CallbackQueryHandler", reply_markup=reply_markup
+def done(update: Update, context: CallbackContext) -> int:
+    """Display the gathered info and end the conversation."""
+    user_data = context.user_data
+    if 'choice' in user_data:
+        del user_data['choice']
+
+    update.message.reply_text(
+        f"I learned these facts about you: {facts_to_str(user_data)}Until next time!",
+        reply_markup=ReplyKeyboardRemove(),
     )
-    return FIRST
 
-
-def three(update, _):
-    """Показ выбора кнопок"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("Да, сделаем это снова!", callback_data=str(ONE)),
-            InlineKeyboardButton("Нет, с меня хватит ...", callback_data=str(TWO)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Третий CallbackQueryHandler. Начать сначала?", reply_markup=reply_markup
-    )
-    # Переход в состояние разговора `SECOND`
-    return SECOND
-
-
-def four(update, _):
-    """Показ выбора кнопок"""
-    query = update.callback_query
-    query.answer()
-    keyboard = [
-        [
-            InlineKeyboardButton("2", callback_data=str(TWO)),
-            InlineKeyboardButton("4", callback_data=str(FOUR)),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text(
-        text="Четвертый CallbackQueryHandler, выберите маршрут", reply_markup=reply_markup
-    )
-    return FIRST
-
-
-def end(update, _):
-    """Возвращает `ConversationHandler.END`, который говорит
-    `ConversationHandler` что разговор окончен"""
-    query = update.callback_query
-    query.answer()
-    query.edit_message_text(text="See you next time!")
+    user_data.clear()
     return ConversationHandler.END
 
 
-if __name__ == '__main__':
+def main() -> None:
+    """Run the bot."""
+    # Create the Updater and pass it your bot's token.
+
     load_dotenv()
     telegram_token = os.environ['TG_TOKEN']
     updater = Updater(telegram_token)
+
+    # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
-    # Настройка обработчика разговоров с состояниями `FIRST` и `SECOND`
-    # Используем параметр `pattern` для передачи `CallbackQueries` с
-    # определенным шаблоном данных соответствующим обработчикам
-    # ^ - означает "начало строки"
-    # $ - означает "конец строки"
-    # Таким образом, паттерн `^ABC$` будет ловить только 'ABC'
+    # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
-        states={ # словарь состояний разговора, возвращаемых callback функциями
-            FIRST: [
-                CallbackQueryHandler(one, pattern='^' + str(ONE) + '$'),
-                CallbackQueryHandler(two, pattern='^' + str(TWO) + '$'),
-                CallbackQueryHandler(three, pattern='^' + str(THREE) + '$'),
-                CallbackQueryHandler(four, pattern='^' + str(FOUR) + '$'),
+        states={
+            CHOOSING: [
+                MessageHandler(
+                    Filters.regex('^(Age|Favourite colour|Number of siblings)$'), regular_choice
+                ),
+                MessageHandler(Filters.regex('^Something else...$'), custom_choice),
             ],
-            SECOND: [
-                CallbackQueryHandler(start_over, pattern='^' + str(ONE) + '$'),
-                CallbackQueryHandler(end, pattern='^' + str(TWO) + '$'),
+            TYPING_CHOICE: [
+                MessageHandler(
+                    Filters.text & ~(Filters.command | Filters.regex('^Done$')), regular_choice
+                )
+            ],
+            TYPING_REPLY: [
+                MessageHandler(
+                    Filters.text & ~(Filters.command | Filters.regex('^Done$')),
+                    received_information,
+                )
             ],
         },
-        fallbacks=[CommandHandler('start', start)],
+        fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
     )
 
-    # Добавляем `ConversationHandler` в диспетчер, который
-    # будет использоваться для обработки обновлений
     dispatcher.add_handler(conv_handler)
 
+    # Start the Bot
     updater.start_polling()
+
+    # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT. This should be used most of the time, since
+    # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
+
+
+if __name__ == '__main__':
+    main()

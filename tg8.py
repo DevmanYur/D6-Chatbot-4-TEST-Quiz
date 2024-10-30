@@ -44,7 +44,7 @@ def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(reply_markup=reply_markup)
 
 
-def get_question(units_dict, redis_object,  update: Update, context: CallbackContext):
+def handle_new_question_request(units_dict, redis_object,  update: Update, context: CallbackContext):
     unit = random.choice(units_dict)
     update.message.reply_text('Сейчас отправлю новый вопрос!')
     update.message.reply_text(unit['Вопрос'])
@@ -60,7 +60,7 @@ def get_my_account(update: Update, context: CallbackContext):
     update.message.reply_text('Сделал запрос на Мой счёт.')
 
 
-def send_answer(redis_object, update: Update, context: CallbackContext):
+def handle_solution_attempt(redis_object, update: Update, context: CallbackContext):
     answer = redis_object.get('Ответ')
     if update.message.text == answer:
         update.message.reply_text('Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос»')
@@ -69,8 +69,8 @@ def send_answer(redis_object, update: Update, context: CallbackContext):
 
 
 def start_tg_bot(telegram_token, redis_object, units):
-    get_new_question = partial(get_question, units, redis_object)
-    send_new_answer = partial(send_answer, redis_object)
+    get_new_question = partial(handle_new_question_request, units, redis_object)
+    send_new_answer = partial(handle_solution_attempt, redis_object)
 
     updater = Updater(telegram_token)
     dispatcher = updater.dispatcher
