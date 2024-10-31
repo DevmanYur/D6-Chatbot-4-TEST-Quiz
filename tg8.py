@@ -32,16 +32,15 @@ def get_units():
 
 
 def start(update: Update, context: CallbackContext) -> None:
-    user = update.effective_user
-    update.message.reply_markdown_v2(
-        fr'{user.mention_markdown_v2()} приветствую в нашей викторине\! Чтобы продолжить, нажми на "Новый вопрос" ☺',
-        reply_markup=ForceReply(selective=True),
-    )
-
     custom_keyboard = [['Новый вопрос', 'Сдаться'],
                        ['Мой счёт']]
     reply_markup = ReplyKeyboardMarkup(custom_keyboard)
-    update.message.reply_text(reply_markup=reply_markup)
+    user = update.effective_user
+    update.message.reply_markdown_v2(
+        fr'{user.mention_markdown_v2()} приветствую в нашей викторине\! Чтобы продолжить, нажми на "Новый вопрос" ☺',
+        # reply_markup=ForceReply(selective=True),
+        reply_markup=reply_markup
+    )
 
 
 def handle_new_question_request(units_dict, redis_object,  update: Update, context: CallbackContext):
