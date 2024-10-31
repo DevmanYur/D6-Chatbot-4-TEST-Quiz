@@ -45,15 +45,19 @@ def start(update: Update, context: CallbackContext) -> None:
 
 def handle_new_question_request(units_dict, redis_object,  update: Update, context: CallbackContext):
     unit = random.choice(units_dict)
-    update.message.reply_text('Сейчас отправлю новый вопрос!')
+    update.message.reply_text('Сейчас отправлю новый вопрос:')
     update.message.reply_text(unit['Вопрос'])
     chat_id = update.message.chat_id
     redis_object.mset(unit)
     redis_object.set('chat_id', chat_id)
 
 
-def give_in(update: Update, context: CallbackContext):
-    update.message.reply_text('Точно сдаться?')
+def give_in(units_dict, redis_object, update: Update, context: CallbackContext):
+    unit = random.choice(units_dict)
+    answer = redis_object.get('Ответ')
+    update.message.reply_text(f'Правильный ответ {answer}')
+    update.message.reply_text('Сейчас отправлю новый вопрос:')
+    update.message.reply_text(unit['Вопрос'])
 
 def get_my_account(update: Update, context: CallbackContext):
     update.message.reply_text('Сделал запрос на Мой счёт.')
@@ -69,13 +73,15 @@ def handle_solution_attempt(redis_object, update: Update, context: CallbackConte
 
 def start_tg_bot(telegram_token, redis_object, units):
     get_new_question = partial(handle_new_question_request, units, redis_object)
+    get_give_in = partial(give_in, units, redis_object)
     send_new_answer = partial(handle_solution_attempt, redis_object)
+
 
     updater = Updater(telegram_token)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(MessageHandler(Filters.text('Новый вопрос'), get_new_question))
-    dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), give_in))
+    dispatcher.add_handler(MessageHandler(Filters.text('Сдаться'), get_give_in))
     dispatcher.add_handler(MessageHandler(Filters.text('Мой счёт'), get_my_account))
     dispatcher.add_handler(MessageHandler(Filters.text, send_new_answer))
     updater.start_polling()
