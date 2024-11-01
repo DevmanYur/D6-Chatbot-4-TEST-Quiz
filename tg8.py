@@ -43,8 +43,8 @@ def start(update: Update, context: CallbackContext) -> None:
     )
 
 
-def handle_new_question_request(units_dict, redis_object,  update: Update, context: CallbackContext):
-    unit = random.choice(units_dict)
+def handle_new_question_request(units, redis_object,  update: Update, context: CallbackContext):
+    unit = random.choice(units)
     update.message.reply_text('Сейчас отправлю новый вопрос:')
     update.message.reply_text(unit['Вопрос'])
     chat_id = update.message.chat_id
@@ -52,8 +52,8 @@ def handle_new_question_request(units_dict, redis_object,  update: Update, conte
     redis_object.set('chat_id', chat_id)
 
 
-def give_in(units_dict, redis_object, update: Update, context: CallbackContext):
-    unit = random.choice(units_dict)
+def give_in(units, redis_object, update: Update, context: CallbackContext):
+    unit = random.choice(units)
     answer = redis_object.get('Ответ')
     update.message.reply_text(f'Правильный ответ {answer}')
     update.message.reply_text('Сейчас отправлю новый вопрос:')

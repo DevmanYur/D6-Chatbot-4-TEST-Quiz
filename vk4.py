@@ -61,35 +61,46 @@ def start_vk_bot(vk_community_token, redis_object, units):
     vk_session = vk.VkApi(token=vk_community_token)
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('Новый вопрос', color=VkKeyboardColor.POSITIVE)
+    keyboard.add_button('Сдаться', color=VkKeyboardColor.NEGATIVE)
+    keyboard.add_line()
+    keyboard.add_button('Мой счёт', color=VkKeyboardColor.PRIMARY)
+
+
+
+
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
 
-            keyboard = VkKeyboard(one_time=True)
-            keyboard.add_button('Новый вопрос', color=VkKeyboardColor.POSITIVE)
-            keyboard.add_button('Сдаться', color=VkKeyboardColor.NEGATIVE)
-            keyboard.add_line()
-            keyboard.add_button('Мой счёт', color=VkKeyboardColor.PRIMARY)
 
 
+            if event.text == "Новый вопрос":
+                unit = random.choice(units)
+                redis_object.mset(unit)
+                vk_api.messages.send(
+                    user_id=event.user_id,
+                    message=f'{unit['Вопрос']}',
+                    keyboard=keyboard.get_keyboard(),
+                    random_id=random.randint(1, 1000))
+
+            if event.text == redis_object.get('Ответ'):
+                vk_api.messages.send(
+                    user_id=event.user_id,
+                    message=f'Супер - это правильный ответ',
+                    keyboard=keyboard.get_keyboard(),
+                    random_id=random.randint(1, 1000))
 
             if event.text == "Сдаться":
-                print("Сдаться")
-                random_id = random.randint(1, 1000)
+                answer = redis_object.get('Ответ')
                 vk_api.messages.send(
                     user_id=event.user_id,
-                    message='Сдаться_______!',
+                    message=f'Окей, правильный ответ - {answer}',
                     keyboard=keyboard.get_keyboard(),
-                    random_id=random_id
+                    random_id=random.randint(1, 1000)
                 )
-            if event.text == "Новый вопрос":
-                print("Новый вопрос")
-                random_id = random.randint(1, 1000)
-                vk_api.messages.send(
-                    user_id=event.user_id,
-                    message='Новый вопрос______!',
-                    keyboard=keyboard.get_keyboard(),
-                    random_id=random_id
-                )
+
+
     VkLongPoll(vk_session)
 
 
