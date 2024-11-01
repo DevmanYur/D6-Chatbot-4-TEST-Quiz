@@ -34,33 +34,12 @@ def get_units():
            units.append(unit_dict)
        return units
 
-def get_answer_vk(event, vk_api):
-    keyboard = VkKeyboard(one_time=True)
-
-    keyboard.add_button('Новый вопрос', color=VkKeyboardColor.SECONDARY)
-    keyboard.add_button('Зелёная кнопка', color=VkKeyboardColor.POSITIVE)
-    keyboard.add_button('Сдаться', color=VkKeyboardColor.NEGATIVE)
-
-    keyboard.add_line()
-    keyboard.add_button('Синяя кнопка', color=VkKeyboardColor.PRIMARY)
-
-
-    chat_id = event.user_id
-    question = event.text
-    random_id = random.randint(1, 1000)
-    vk_api.messages.send(
-            user_id=event.user_id,
-            keyboard=keyboard.get_keyboard(),
-            message='Привет привет!',
-            random_id=get_random_id
-        )
-
-
 
 def start_vk_bot(vk_community_token, redis_object, units):
     vk_session = vk.VkApi(token=vk_community_token)
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
+
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Новый вопрос', color=VkKeyboardColor.POSITIVE)
     keyboard.add_button('Сдаться', color=VkKeyboardColor.NEGATIVE)
@@ -68,12 +47,8 @@ def start_vk_bot(vk_community_token, redis_object, units):
     keyboard.add_button('Мой счёт', color=VkKeyboardColor.PRIMARY)
 
 
-
-
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-
-
 
             if event.text == "Новый вопрос":
                 unit = random.choice(units)
@@ -99,8 +74,6 @@ def start_vk_bot(vk_community_token, redis_object, units):
                     keyboard=keyboard.get_keyboard(),
                     random_id=random.randint(1, 1000)
                 )
-
-
     VkLongPoll(vk_session)
 
 
