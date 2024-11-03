@@ -16,18 +16,16 @@ def get_questions_dict():
 
                if "Вопрос " in x:
                    print('Это вопрос')
-                   print(x.find(':'))
                    ind_ = x.find(':')+1
-
-                   print(x)
-                   print()
-                   print(x[ind_:])
-                   print()
-                   print(x[:ind_])
                    line = x[:ind_]
-
                    numbers = re.findall(r'\b\d+\b', line)
                    print(numbers)
+                   print(x[ind_:])
+                   print()
+
+
+
+
 
 
                    print()
