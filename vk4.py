@@ -8,6 +8,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import random
 import redis
 
+from quiz import get_quiz
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ def main():
     redis_password = os.environ['REDIS_PASSWORD']
     redis_object = redis.Redis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
 
-    units = get_units()
+    units = get_quiz()
 
     start_vk_bot(vk_community_token, redis_object, units)
 
