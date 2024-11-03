@@ -7,8 +7,6 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import random
 import redis
-from vk_api.utils import get_random_id
-
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_units():
-   with open('1vs1201_.txt', "r", encoding="KOI8-R") as my_file:
+   with open('1vs1299.txt', "r", encoding="KOI8-R") as my_file:
        file_contents = my_file.read()
        file_contents_split = file_contents.split('\n\n\n')
        units = []
